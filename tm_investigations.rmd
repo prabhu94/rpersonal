@@ -1,0 +1,102 @@
+---
+title: "Text Mining Investigations"
+author: "Prabhat Turlapati"
+date: "January 20, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+require(ggplot2)
+require(plyr)
+require(dplyr)
+require(stringr)
+library(reshape)
+require(tm)
+require(SnowballC)
+require(pdftools)
+require(wordcloud)
+
+```
+### Data Import
+```{r}
+
+#Dictionary import
+
+# ukdict <- read_lines(file = "F:\\KaggleDatasets\\zipf\\ukenglish.txt")
+# ukdictone<-read_lines(file = "F:\\KaggleDatasets\\zipf\\english2.txt")
+# ukdicttwo<-read_lines(file = "F:\\KaggleDatasets\\zipf\\english3.txt")
+# ukdictthree<-read_lines(file = "F:\\KaggleDatasets\\zipf\\engmix.txt")
+# usdictone<-read_lines(file = "F:\\KaggleDatasets\\zipf\\usa.txt")
+# usdicttwo<-read_lines(file = "F:\\KaggleDatasets\\zipf\\usa2.txt")
+
+# dictionary <-  cbind(ukdict,ukdictone,ukdicttwo,ukdictthree,usdictone,usdicttwo)
+# dictionary <- melt(dictionary)
+# dictionary_words <- unique(dictionary$value)
+# dictionary_words <- as.character(dictionary_words)
+
+# Data Import
+
+setwd("F:\\KaggleDatasets\\zipf\\")
+raw.text <- pdf_text(pdf="A_Christmas_Carol_NT.pdf")
+temp.one <- str_replace_all(raw.text,"[\r\n]"," ")
+#proc_one <- str_replace_all(proc_one,"[0-9]+","")
+temp.one <- str_replace_all(temp.one,"[^a-zA-Z]"," ")
+#proc_one <- str_replace_all(proc_one," x "," ")
+#proc_one <- str_replace_all(proc_one," y "," ")
+#proc_one <- str_replace_all(proc_one," z "," ")
+#proc_one <- proc_one[proc_one %in% dictionary_words]
+#intersect(proc_one,dictionary_words)
+# temp.one <- sapply(temp.one, tolower)
+# temp.one <- str_split(temp.one," ")
+# temp.one <- unlist(temp.one,recursive = TRUE)
+# temp.one <- temp.one[temp.one !=""]
+# str(temp.one)
+
+tm.read.pdf <-  readPDF(control = list(text = "-layout"))(elem = list(uri="F:\\KaggleDatasets\\zipf\\econtest.pdf"),language = "en")
+
+tm.read.pdf.content <- tm.read.pdf$content
+tm.read.pdf.content <- tm.read.pdf.content[-c(1:2)]
+tm.read.pdf.content <- str_replace_all(tm.read.pdf.content,"[\r\n]"," ")
+tm.read.pdf.content <- str_replace_all(tm.read.pdf.content,"[0-9]+ of [0-9]+"," ")
+
+text.corpus <- Corpus(VectorSource(tm.read.pdf.content))
+cleaned.data <- tm_map(text.corpus, stripWhitespace)
+cleaned.data <- tm_map(cleaned.data, removeNumbers)
+cleaned.data <- tm_map(cleaned.data, content_transformer(tolower))
+cleaned.data <- tm_map(cleaned.data, removeWords, stopwords("english"))
+cleaned.data <- tm_map(cleaned.data, removePunctuation)
+
+
+wordcloud(cleaned.data, max.words=500, random.order=FALSE, scale= c(4, 0.1), colors=brewer.pal(8,"Dark2"))
+
+# proc_two_df <- as.data.frame(proc_two)
+# str(proc_two_df)
+```
+
+```{r}
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
